@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class GameManagerX : MonoBehaviour
 {
     public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI timeText;
     public TextMeshProUGUI gameOverText;
     public GameObject titleScreen;
     public Button restartButton; 
@@ -17,27 +18,63 @@ public class GameManagerX : MonoBehaviour
     private int score;
     private float spawnRate = 1.5f;
     public bool isGameActive;
+
+    public float timeRemaining = 60;
+    public bool timerIsRunning = false;
     
 
     private float spaceBetweenSquares = 2.5f; 
     private float minValueX = -3.75f; //  x value of the center of the left-most square
     private float minValueY = -3.75f; //  y value of the center of the bottom-most square
+    private float startTime;
 
     private void Start()
     {
-        timerIsRunning = true;
+        
     }
+
+    public void Update()
+    {
+        timerIsRunning = true;
+
+        if (timerIsRunning)
+        {
+            startTime = Time.deltaTime;
+            while (timeRemaining > 0)
+            {
+                timeRemaining -= startTime;
+                UpdateTimer(timeRemaining);
+            }
+            timerIsRunning = false;
+        }
+
+        else
+        {
+            GameOver();
+            timeRemaining = 0;
+        }
+    }
+
 
     // Start the game, remove title screen, reset score, and adjust spawnRate based on difficulty button clicked
     public void StartGame(int difficulty)
     {
         spawnRate /= difficulty;
         isGameActive = true;
+        
         StartCoroutine(SpawnTarget());
+        
         score = 0;
         UpdateScore(0);
+        
         titleScreen.SetActive(false);
+
+        
     }
+
+
+        
+
 
     // While game is active spawn a random target
     IEnumerator SpawnTarget()
@@ -77,6 +114,12 @@ public class GameManagerX : MonoBehaviour
     {
         score += scoreToAdd;
         scoreText.text = "Score: " + score;
+    }
+
+    public void UpdateTimer(float timeToSubtract)
+    {
+        timeRemaining -= timeToSubtract;
+        timeText.text = "Time: " + timeRemaining;
     }
 
     // Stop game, bring up game over text and restart button
